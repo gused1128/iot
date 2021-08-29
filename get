@@ -1,11 +1,19 @@
 #include <Ethernet.h>
 #include <SPI.h>
-#define NUM_ARDUINO "X" //Poner en X el número de Arduino
-const int LDRPin = A0;
+#include <DHT.h>                   // Librerias para el sensor DHT  
+#include <DHT_U.h>
 
-byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xYY};  //Sustituir YY por el numero de MAC correcto
 
-byte ip_raspberrypi[] = {192, 168, 6, Z}; //Sustituir Z por la IP de la Raspberry Pi
+//variables sensor DHT11
+#define DHTPIN 4
+#define DHTTYPE DHT11
+float TEMPERATURA;
+float HUMEDAD;
+DHT dht(DHTPIN, DHTTYPE);
+
+byte mac[] = {0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x01 };  //Sustituir YY por el numero de MAC correcto
+
+byte ip_server[] = {47.90.139.188}; //Sustituir Z por la IP de la Raspberry Pi
 
 EthernetClient client;
 
@@ -31,14 +39,16 @@ void setup()
 
 void loop()
 {
-  //Leo datos de luminosidad
-  int luminosidad = analogRead(LDRPin);
-
+ // Inicio: Sensor Temperatura y humedad ambiente
+  TEMPERATURA = dht.readTemperature();
+  HUMEDAD = dht.readHumidity();
+  
+  
   //Conecto a Raspberry Pi
   if (client.connect(ip_raspberrypi, 80)) {
     Serial.println("connected");
-    client.println("GET /Graba_GET.php?arduino=" + String(NUM_ARDUINO) + "&IntensidadLuminosa=" + String(luminosidad) + " HTTP/1.1");
-    client.println("Host: miraspberry");
+    client.println("GET /Graba_GET.php?humedad=" + String(HUMEDAD) + "temperatura=" + String(TEMPERATURA) + " HTTP/1.1");
+    client.println("Host: cacao.uno");
     client.println("Connection: close");
     client.println();
   }
@@ -62,7 +72,7 @@ void loop()
     delay(5);
   }  while (client.available() > 0);
 
-  Serial.print("He recibido de Raspberry Pi: ");
+  Serial.print("He recibido sel severidor : ");
   Serial.println(webString);
   client.stop();
 
