@@ -45,7 +45,7 @@ void loop()
   
   
   //Conecto a Raspberry Pi
-  if (client.connect(ip_raspberrypi, 80)) {
+  if (client.connect(ip_server, 80)) {
     Serial.println("connected");
     client.println("GET /Graba_GET.php?humedad=" + String(HUMEDAD) + "temperatura=" + String(TEMPERATURA) + " HTTP/1.1");
     client.println("Host: cacao.uno");
